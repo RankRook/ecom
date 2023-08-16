@@ -242,6 +242,10 @@ const resetPassword = asyncHandler(async (req, res) => {
   res.json(user);
 });
 
+const userCart = asyncHandler(async (req, res) => {
+  
+})
+
 module.exports = {
   createUser,
   loginUser,
@@ -255,7 +259,8 @@ module.exports = {
   logout,
   updatePassword,
   resetPassword,
-  forgotPasswordToken
+  forgotPasswordToken,
+  userCart
 }
 
 
