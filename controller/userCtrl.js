@@ -51,6 +51,41 @@ const loginUser = asyncHandler(async (req, res) => {
   }
 })
 
+//login Admin
+
+const loginAdmin = asyncHandler(async (req, res) => {
+  const { email, password } = req.body;
+  const findAdmin = await User.findOne({ email });
+  if (findAdmin.role !== "admin") throw new Error("Not Authorized");
+  if (findAdmin && (await findAdmin.isPasswordMatched(password))) {
+    const refreshToken = await generateRefreshToken(findAdmin?._id);
+    const updateuser = await User.findByIdAndUpdate(
+      findAdmin.id,
+      {
+        refreshToken: refreshToken,
+      },
+      {
+        new: true
+      }
+    );
+    res.cookie("refreshTtoken", refreshToken, {
+      httpOnly: true,
+      maxAge: 72 * 60 * 60 * 1000
+    });
+    res.json({
+      _id: findAdmin?._id,
+      firstname: findAdmin?.firstname,
+      lastname: findAdmin?.lastname,
+      email: findAdmin?.email,
+      mobile: findAdmin?.mobile,
+      token: generateToken(findAdmin?._id),
+    });
+  } else {
+    throw new Error("Invalid Credentia")
+  }
+});
+
+
 // Refresh Token
 
 const handleRefreshToken = asyncHandler(async (req, res) => {
@@ -115,29 +150,31 @@ const updatedUser = asyncHandler(async (req, res) => {
   }
 })
 
-//Get All User
+// Get all users
 
 const getAllUser = asyncHandler(async (req, res) => {
   try {
-    const getUsers = await User.find();
-    res.json(getUsers)
+    const getUsers = await User.find().populate("wishlist");
+    res.json(getUsers);
   } catch (error) {
-    throw new Error(error)
+    throw new Error(error);
   }
-})
+});
 
-//Get a User
+// Get a single user
 
 const getUser = asyncHandler(async (req, res) => {
   const { id } = req.params;
+  validateMongoDbId(id);
   try {
-    const getUsers = await User.findById(id);
-    res.json(getUsers)
+    const getaUser = await User.findById(id);
+    res.json({
+      getaUser,
+    });
   } catch (error) {
-    throw new Error(error)
+    throw new Error(error);
   }
-})
-
+});
 // Delete functionality
 
 const deleteUser = asyncHandler(async (req, res) => {
@@ -192,6 +229,8 @@ const unBlockUser = asyncHandler(async (req, res) => {
   }
 })
 
+// update password
+
 const updatePassword = asyncHandler(async (req, res) => {
   const { _id } = req.user;
   const { password } = req.body;
@@ -206,8 +245,10 @@ const updatePassword = asyncHandler(async (req, res) => {
   }
 })
 
+// forgot password token
+
 const forgotPasswordToken = asyncHandler(async (req, res) => {
-  const { email} = req.body;
+  const { email } = req.body;
   const user = await User.findOne({ email });
   if (!user) throw new Error("User not found with this email");
   try {
@@ -227,6 +268,8 @@ const forgotPasswordToken = asyncHandler(async (req, res) => {
   }
 });
 
+//reset password
+
 const resetPassword = asyncHandler(async (req, res) => {
   const { password } = req.body;
   const { token } = req.params;
@@ -242,9 +285,41 @@ const resetPassword = asyncHandler(async (req, res) => {
   res.json(user);
 });
 
-const userCart = asyncHandler(async (req, res) => {
-  
+// add to wishlist
+
+const getWishlist = asyncHandler(async (req, res) => {
+  const { _id } = req.user;
+  try {
+    const findUser = await User.findById(_id).populate("wishlist");
+    console.log(findUser);
+    res.json({
+      findUser,
+    });
+  } catch (error) {
+    throw new Error(error);
+  }
+});
+
+// Save user andress
+
+const saveAddress = asyncHandler(async (req, res) => {
+  const { _id } = req.user;
+  validateMongoDbId(_id);
+  try {
+    const saveAddress = await User.findByIdAndUpdate(_id,
+      {
+        address: req?.body?.address,
+      },
+      {
+        new: true
+      }
+    )
+    res.json(saveAddress)
+  } catch (error) {
+    throw new Error(error)
+  }
 })
+
 
 module.exports = {
   createUser,
@@ -260,7 +335,9 @@ module.exports = {
   updatePassword,
   resetPassword,
   forgotPasswordToken,
-  userCart
+  loginAdmin,
+  getWishlist,
+  saveAddress,
 }
 
 
