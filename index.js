@@ -10,13 +10,16 @@ const categoryRoute = require('./routes/categoryRoute')
 const blogCatRoute = require('./routes/blogCatRoute')
 const brandRoute = require('./routes/brandRoute')
 const couponRoute = require('./routes/couponRoute')
+const enqRoute = require('./routes/enqRoute')
 const bodyParser = require('body-parser')
 const cookieParser = require("cookie-parser")
 const { errorHandler, notFound } = require('./middlewares/errorHandler')
+const cors = require('cors')
 const morgan = require('morgan')
 // Connect to database
 dbConnect();
 app.use(morgan("dev"))
+app.use(cors());
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({extended:false}))
 app.use(cookieParser())
@@ -26,7 +29,8 @@ app.use('/api/product', productRouter)
 app.use('/api/blog', blogRouter)
 app.use('/api/category', categoryRoute)
 app.use('/api/blogcategory', blogCatRoute)
-app.use('/api/brandRoute', brandRoute)
+app.use("/api/enquiry", enqRoute);
+app.use('/api/brand', brandRoute)
 app.use('/api/coupon', couponRoute)
 
 // app.use(notFound)
