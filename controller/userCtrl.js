@@ -455,13 +455,29 @@ const createOrder = asyncHandler(async (req, res) => {
   }
 });
 
-const getOders = asyncHandler(async(req,res)=>{
+const getOrders = asyncHandler(async(req,res)=>{
   const {_id} = req.user;
   validateMongoDbId(_id);
   try{
-      const useroders = await Order.findOne({ orderby:_id }).populate('products.product').exec();
+      const useroders = await Order.findOne({ orderby:_id })
+      .populate('products.product')
+      .populate('orderby')
+      .exec();
       if(!useroders) throw new Error('No orders found');
       res.json(useroders);
+  }catch(err){
+    throw new Error(err)
+  }
+})
+
+const getAllUserOrders = asyncHandler(async(req,res)=>{
+  try{
+      const alluseroders = await Order.find()
+      .populate('products.product')
+      .populate('orderby')
+      .exec();
+      if(!alluseroders) throw new Error('No orders found');
+      res.json(alluseroders);
   }catch(err){
     throw new Error(err)
   }
@@ -512,6 +528,7 @@ module.exports = {
   emptyCart,
   applyCoupon,
   createOrder,
-  getOders,
-  updateOrderStatus
+  getOrders,
+  updateOrderStatus,
+  getAllUserOrders
 };
