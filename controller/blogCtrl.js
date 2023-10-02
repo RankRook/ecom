@@ -60,8 +60,8 @@ const getAllBlogs = asyncHandler(async (req, res) => {
 })
 
 const deleteBlog = asyncHandler(async (req, res) => {
-    validateMongoDbId(id)
     const { id } = req.params;
+    validateMongoDbId(id)
     try {
         const deleteBlog = await Blog.findByIdAndDelete(id);
         res.json(deleteBlog);

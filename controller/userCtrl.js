@@ -296,9 +296,9 @@ const resetPassword = asyncHandler(async (req, res) => {
 
 const getWishlist = asyncHandler(async (req, res) => {
   const { _id } = req.user;
+
   try {
     const findUser = await User.findById(_id).populate("wishlist");
-    console.log(findUser);
     res.json({
       findUser,
     });
@@ -455,34 +455,44 @@ const createOrder = asyncHandler(async (req, res) => {
   }
 });
 
-const getOrders = asyncHandler(async(req,res)=>{
-  const {_id} = req.user;
+const getOrders = asyncHandler(async (req, res) => {
+  const { _id } = req.user;
   validateMongoDbId(_id);
-  try{
-      const useroders = await Order.findOne({ orderby:_id })
-      .populate('products.product')
-      .populate('orderby')
+  try {
+    const userorders = await Order.findOne({ orderby: _id })
+      .populate("products.product")
+      .populate("orderby")
       .exec();
-      if(!useroders) throw new Error('No orders found');
-      res.json(useroders);
-  }catch(err){
-    throw new Error(err)
+    res.json(userorders);
+  } catch (error) {
+    throw new Error(error);
   }
-})
+});
 
-const getAllUserOrders = asyncHandler(async(req,res)=>{
-  try{
-      const alluseroders = await Order.find()
-      .populate('products.product')
-      .populate('orderby')
+const getAllOrders = asyncHandler(async (req, res) => {
+  try {
+    const alluserorders = await Order.find()
+      .populate("products.product")
+      .populate("orderby")
       .exec();
-      if(!alluseroders) throw new Error('No orders found');
-      res.json(alluseroders);
-  }catch(err){
-    throw new Error(err)
+    res.json(alluserorders);
+  } catch (error) {
+    throw new Error(error);
   }
-})
-
+});
+const getOrderByUserId = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  validateMongoDbId(id);
+  try {
+    const userorders = await Order.findOne({ orderby: id })
+      .populate("products.product")
+      .populate("orderby")
+      .exec();
+    res.json(userorders);
+  } catch (error) {
+    throw new Error(error);
+  }
+});
 const updateOrderStatus = asyncHandler(async (req, res) => {
   const { status } = req.body;
   const { id } = req.params;
@@ -530,5 +540,6 @@ module.exports = {
   createOrder,
   getOrders,
   updateOrderStatus,
-  getAllUserOrders
+  getAllOrders,
+  getOrderByUserId
 };
