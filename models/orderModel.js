@@ -2,79 +2,72 @@ const mongoose = require("mongoose");
 
 var orderSchema = new mongoose.Schema(
   {
-    user:{
+    user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-      required: true
+      required: true,
     },
-    shippigInfo:{
-      firstName:{
+    shippigInfo: {
+      firstName: {
         type: String,
-        required: true
+        required: true,
       },
-      lastName:{
+      lastName: {
         type: String,
-        required: true
+        required: true,
       },
-      address:{
+      address: {
         type: String,
-        required: true
-      }
-      ,
-      city:{
+        required: true,
+      },
+      city: {
         type: String,
-        required: true
-      }
-      ,
-      other:{
-        type: String,
-        required: true
-      }
+        required: true,
+      },
+      phone: {
+        type: Number,
+        required: true,
+      },
     },
-    paymentInfo: {
-      razorpayOrderId: {
-        type: String,
-        required: true
-      },
-      razorpayPaymetId: {
-        type: String,
-        required: true
-      }
-    },
-    orderItems:[
+    orderItems: [
       {
-        product:{
+        product: {
           type: mongoose.Schema.Types.ObjectId,
-          ref:"Product",
+          ref: "Product",
           required: true,
         },
-        quantity:{
+        quantity: {
           type: Number,
           required: true,
-        }
-        ,
-        price:{
+        },
+        price: {
           type: Number,
           required: true,
-        }
-      }
+        },
+      },
     ],
     paidAt: {
       type: Date,
-      default: Date.now()
+      default: Date.now(),
     },
-    totlePrice:{
+    totlePrice: {
       type: Number,
-      required: true
+      required: true,
     },
-    totlePriceAfterDiscount:{
+    totlePriceAfterDiscount: {
       type: Number,
-      required: true
+      required: true,
     },
-    orderStatus:{
+    orderStatus: {
       type: String,
-      default: "Ordered"
-    }
+      default: "Ordered",
+    },
+    paymentMethod: { type: String, required: true },
+    itemsPrice: { type: Number, required: true },
+    isPaid: { type: Boolean, default: false },
+    paidAt: { type: Date },
+    isDelivered: { type: Boolean, default: false },
+    deliveredAt: { type: Date },
   },
   {
     timestamps: true,
