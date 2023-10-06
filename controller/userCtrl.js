@@ -390,8 +390,10 @@ const createOrder = asyncHandler(async (req, res) => {
     shippingInfo,
     orderItems,
     totalPrice,
-    totlePriceAfterDiscount,
-    paymentInfo,
+    totalPriceAfterDiscount,
+    paymentMethod,
+    isPaid, 
+    paidAt,
   } = req.body;
   const { _id } = req.user;
   try {
@@ -399,8 +401,10 @@ const createOrder = asyncHandler(async (req, res) => {
       shippingInfo,
       orderItems,
       totalPrice,
-      totlePriceAfterDiscount,
-      paymentInfo,
+      totalPriceAfterDiscount,
+      paymentMethod,
+      isPaid, 
+      paidAt,
       user: _id,
     });
     res.json({

@@ -29,7 +29,8 @@ const { createUser,
 const { authMiddleware, isAdmin } = require('../middlewares/authMiddleware');
 // const { checkout, paymentVerification } = require('../controller/paymentCtrl');
 const router = express.Router();
-
+const dotenv = require('dotenv');
+dotenv.config()
 
 router.post("/register", createUser);
 router.post("/forgot-password-token", forgotPasswordToken);
@@ -42,6 +43,13 @@ router.post("/admin-login", loginAdmin);
 router.post("/cart", authMiddleware, userCart);
 // router.post("/order/checkout", authMiddleware, checkout)
 // router.post("/order/paymentVerification", authMiddleware, paymentVerification)
+
+router.get('/checkout/config', (req, res) => {
+    return res.status(200).json({
+      status: 'OK',
+      data: process.env.CLIENT_ID
+    })
+  })
 
 // router.post("/cart/apply-coupon", authMiddleware, applyCoupon);
 router.post("/cart/create-order", authMiddleware, createOrder);
