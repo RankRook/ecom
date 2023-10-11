@@ -416,6 +416,80 @@ const createOrder = asyncHandler(async (req, res) => {
   }
 });
 
+
+const applyCoupon = asyncHandler(async (req, res) => {
+  const { coupon } = req.body;
+  const { _id } = req.user;
+  validateMongoDbId(_id);
+  const validCoupon = await Coupon.findOne({ name: coupon });
+
+  if (validCoupon === null) {
+    throw new Error("Invalid Coupon");
+  }
+
+  const user = await User.findOne({ _id });
+  const order = await Order.findOne({ user: user._id });
+
+  if (!order) {
+    throw new Error("Order not found");
+  }
+
+  // Tính toán giá trị mới sau khi áp dụng mã giảm giá
+  const { totalPrice } = order;
+  const totalAfterDiscount = (
+    totalPrice - (totalPrice * validCoupon.discount) / 100
+  ).toFixed(2);
+
+  // Cập nhật giá trị mới vào đơn hàng
+  const updatedOrder = await Order.findOneAndUpdate(
+    { user: user._id },
+    { totalAfterDiscount },
+    { new: true }
+  );
+
+  res.json(updatedOrder);
+});
+// const getOrder = asyncHandler(async(req,res)=>{
+//   const {_id} = req.user;
+//   validateMongoDbId(_id);
+//   try{
+//     const orders = await Order.findOne({user:_id}).populate("user").populate("orderItems.product")
+//     res.json(
+//       orders
+//     )
+//   }
+//   catch(err){
+//     throw new Error(err)
+//   }
+// })
+
+// const getOrders = asyncHandler(async (req, res) => {
+//   const { _id } = req.user;
+//   validateMongoDbId(_id);
+//   try {
+//     const userorders = await Order.findOne({ orderby: _id })
+//       .populate("products.product")
+//       .populate("orderby")
+//       .exec();
+//     res.json(userorders);
+//   } catch (error) {
+//     throw new Error(error);
+//   }
+// });
+
+const getMyOrders = asyncHandler(async(req,res)=>{
+  const {_id} = req.user;
+  try{
+    const orders = await Order.find({user:_id}).populate("user").populate("orderItems.product")
+    res.json(
+      orders
+    )
+  }
+  catch(err){
+    throw new Error(err)
+  }
+})
+
 // const emptyCart = asyncHandler(async (req, res) => {
 //   const { _id } = req.user;
 //   validateMongoDbId(_id);
@@ -426,30 +500,6 @@ const createOrder = asyncHandler(async (req, res) => {
 //   } catch (error) {
 //     throw new Error(error);
 //   }
-// });
-
-// const applyCoupon = asyncHandler(async (req, res) => {
-//   const { coupon } = req.body;
-//   const { _id } = req.user;
-//   validateMongoDbId(_id);
-//   const validCoupon = await Coupon.findOne({ name: coupon });
-//   if (validCoupon === null) {
-//     throw new Error("Invalid Coupon");
-//   }
-//   const user = await User.findOne({ _id });
-//   let { cartTotal } = await Cart.findOne({
-//     orderby: user._id,
-//   }).populate("products.product");
-//   let totalAfterDiscount = (
-//     cartTotal -
-//     (cartTotal * validCoupon.discount) / 100
-//   ).toFixed(2);
-//   await Cart.findOneAndUpdate(
-//     { orderby: user._id },
-//     { totalAfterDiscount },
-//     { new: true }
-//   );
-//   res.json(totalAfterDiscount);
 // });
 
 // const createOrder = asyncHandler(async (req, res) => {
@@ -575,7 +625,8 @@ module.exports = {
   userCart,
   getUserCart,
   // emptyCart,
-  // applyCoupon,
+  applyCoupon,
+  getMyOrders,
   createOrder,
   // getOrders,
   // updateOrderStatus,

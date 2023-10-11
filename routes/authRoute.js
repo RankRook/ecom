@@ -19,10 +19,11 @@ const { createUser,
     getUserCart,
     createOrder,
     // emptyCart,
-    // applyCoupon,
+    applyCoupon,
     // getOrders,
     // updateOrderStatus,
     // getAllOrders,
+    getMyOrders,
     removeProdFromCart,
     updateProdQuantityFromCart
 } = require("../controller/userCtrl");
@@ -51,9 +52,10 @@ router.get('/checkout/config', (req, res) => {
     })
   })
 
-// router.post("/cart/apply-coupon", authMiddleware, applyCoupon);
+router.post("/cart/apply-coupon", authMiddleware, applyCoupon);
 router.post("/cart/create-order", authMiddleware, createOrder);
 router.get("/all-users", getAllUser);
+router.get("/getmyorders", authMiddleware, getMyOrders)
 // router.get("/get-orders", authMiddleware, getOrders);   
 // router.get("/getallorders", authMiddleware, isAdmin, getAllOrders);
 // router.post("/getorderbyuser/:id", authMiddleware, isAdmin, getAllOrders);
