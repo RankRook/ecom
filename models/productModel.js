@@ -45,10 +45,11 @@ var productSchema = new mongoose.Schema(
       }
     ],
     tags: String,
-    ratings: [
+    ratings1: [
       {
         star: Number,
         comment: String,
+        fullname: String,
         postedby: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
       },
     ],

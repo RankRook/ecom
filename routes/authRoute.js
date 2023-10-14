@@ -51,10 +51,10 @@ router.get('/checkout/config', (req, res) => {
       data: process.env.CLIENT_ID
     })
   })
-
+  
 router.post("/cart/apply-coupon", authMiddleware, applyCoupon);
 router.post("/cart/create-order", authMiddleware, createOrder);
-router.get("/all-users", getAllUser);
+router.get("/all-users",  getAllUser);
 router.get("/getmyorders", authMiddleware, getMyOrders)
 // router.get("/get-orders", authMiddleware, getOrders);   
 // router.get("/getallorders", authMiddleware, isAdmin, getAllOrders);

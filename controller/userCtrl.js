@@ -261,7 +261,7 @@ const forgotPasswordToken = asyncHandler(async (req, res) => {
   try {
     const token = await user.createPasswordResetToken();
     await user.save();
-    const resetURL = `Hi, Please follow this link to reset Your Password. This link is valid till 10 minutes from now. <a href='http://localhost:5000/api/user/reset-password/${token}'>Click Here</>`;
+    const resetURL = `Hi, Please follow this link to reset Your Password. This link is valid till 10 minutes from now. <a href='http://localhost:3000/reset-password/${token}'>Click Here</>`;
     const data = {
       to: email,
       text: "Hey User",
@@ -392,29 +392,56 @@ const createOrder = asyncHandler(async (req, res) => {
     totalPrice,
     totalPriceAfterDiscount,
     paymentMethod,
-    isPaid, 
+    isPaid,
     paidAt,
   } = req.body;
   const { _id } = req.user;
+
   try {
+    const promises = orderItems.map(async (order) => {
+      const product = await Product.findOneAndUpdate(
+        {
+          _id: order.product,
+          quantity: { $gte: order.quantity },
+        },
+        {
+          $inc: {
+            quantity: -order.quantity,
+            sold: +order.quantity,
+          },
+        },
+        { new: true }
+      );
+
+      if (!product) {
+        throw new Error(`Sản phẩm với ID ${order.product} không còn đủ hàng.`);
+      }
+    });
+
+    await Promise.all(promises);
+
     const order = await Order.create({
       shippingInfo,
       orderItems,
       totalPrice,
       totalPriceAfterDiscount,
       paymentMethod,
-      isPaid, 
+      isPaid,
       paidAt,
       user: _id,
     });
+
     res.json({
       order,
       success: true,
     });
   } catch (error) {
-    throw new Error(error);
+    res.status(500).json({
+      error: 'Lỗi trong quá trình tạo đơn hàng.',
+    });
   }
 });
+
 
 
 const applyCoupon = asyncHandler(async (req, res) => {
