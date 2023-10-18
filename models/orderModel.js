@@ -56,7 +56,11 @@ var orderSchema = new mongoose.Schema(
     },
     totalPriceAfterDiscount: {
       type: Number,
-      required: false,
+      required: true,
+    },
+    month: {
+      type: String,
+      default: new Date().getMonth(),
     },
     orderStatus: {
       type: String,
