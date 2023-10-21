@@ -490,8 +490,18 @@ const getMyOrders = asyncHandler(async (req, res) => {
 
 const getMonthWiseOrderIncome = asyncHandler(async (req, res) => {
   let monthNames = [
-    "January","February","March", "April", "May",
-    "June","July", "August","September", "October","November", "December",
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
   ];
   let d = new Date();
   let endDate = "";
@@ -499,7 +509,6 @@ const getMonthWiseOrderIncome = asyncHandler(async (req, res) => {
   for (let i = 0; i < 11; i++) {
     d.setMonth(d.getMonth() - 1);
     endDate = monthNames[d.getMonth()] + " " + d.getFullYear();
-    // endDate = month[d.getMonth()] + " " + (d.getFullYear() + 1); // Thêm 1 năm vào năm hiện tại
   }
   const data = await Order.aggregate([
     {
@@ -507,8 +516,8 @@ const getMonthWiseOrderIncome = asyncHandler(async (req, res) => {
         createdAt: {
           $lte: new Date(),
           $gte: new Date(endDate),
-        }
-      }
+        },
+      },
     },
     {
       $group: {
@@ -516,10 +525,10 @@ const getMonthWiseOrderIncome = asyncHandler(async (req, res) => {
           month: "$month",
         },
         amount: { $sum: "$totalPriceAfterDiscount" },
-      }
-    }
+        count: { $sum: 1 },
+      },
+    },
   ]);
-  console.log(data)
   res.json(data);
 });
 const getMonthWiseOrderCount = asyncHandler(async (req, res) => {
@@ -558,7 +567,7 @@ const getMonthWiseOrderCount = asyncHandler(async (req, res) => {
         _id: {
           month: "$month",
         },
-        count: { $sum: "totalPriceAfterDiscount" },
+        count: { $sum: 1 },
       },
     },
   ]);
@@ -598,10 +607,10 @@ const getYearlyTotalOrders = asyncHandler(async (req, res) => {
     },
     {
       $group: {
-        _id: {
-          month: null,
-        },
-        count: { $sum: "totalPriceAfterDiscount" },
+        _id: null,
+        // month: null,
+        count: { $sum: 1 },
+        amount: { $sum: "$totalPriceAfterDiscount" },
       },
     },
   ]);
