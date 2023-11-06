@@ -2,7 +2,7 @@ const Product = require("../models/productModel")
 const User = require("../models/userModel")
 const asyncHandler = require("express-async-handler")
 const slugify = require("slugify")
-const {cloudinaryUploadImg} = require("../utils/cloudinary");
+const {cloudinaryUploadImg, cloudinaryDeleteImg} = require("../utils/cloudinary");
 const validateMongoDbId = require("../utils/validateMongodbId");
 
 
@@ -60,24 +60,26 @@ const getaProduct = asyncHandler(async (req, res) => {
 
 const getAllProduct = asyncHandler(async (req, res) => {
   try {
-    //Filtering
+    // Filtering
     const queryObj = { ...req.query };
-    const excludeFields = ["page", "sort", "limit", "fields"];;
+    const excludeFields = ["page", "sort", "limit", "fields"];
     excludeFields.forEach((el) => delete queryObj[el]);
-
     let queryStr = JSON.stringify(queryObj);
     queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, (match) => `$${match}`);
+
     let query = Product.find(JSON.parse(queryStr));
 
-    //Sorting
+    // Sorting
+
     if (req.query.sort) {
-      const sortBy = req.query.sort.splice(",").join(" ");
-      query = quert.sort(sortBy)
+      const sortBy = req.query.sort.split(",").join(" ");
+      query = query.sort(sortBy);
     } else {
-      query = query.sort("-createdAt")
+      query = query.sort("-createdAt");
     }
 
-    //limitting the fields
+    // limiting the fields
+
     if (req.query.fields) {
       const fields = req.query.fields.split(",").join(" ");
       query = query.select(fields);
@@ -85,23 +87,22 @@ const getAllProduct = asyncHandler(async (req, res) => {
       query = query.select("-__v");
     }
 
-    //pagination
+    // pagination
+
     const page = req.query.page;
     const limit = req.query.limit;
     const skip = (page - 1) * limit;
     query = query.skip(skip).limit(limit);
     if (req.query.page) {
       const productCount = await Product.countDocuments();
-      if (skip >= productCount) throw new Error("This page is not exists")
+      if (skip >= productCount) throw new Error("This Page does not exists");
     }
-
-    console.log(page, limit, skip)
     const product = await query;
-    res.json(product)
+    res.json(product);
   } catch (error) {
-    throw new Error(error)
+    throw new Error(error);
   }
-})
+});
 
 const addToWishList = asyncHandler(async (req, res) => {
   const { _id } = req.user;
@@ -139,19 +140,19 @@ const addToWishList = asyncHandler(async (req, res) => {
 
 const ratingProduct = asyncHandler(async (req, res) => {
   const { _id } = req.user;
-  const { star, prodId, comment } = req.body;
+  const { star, prodId, comment, fullname } = req.body;
   try {
     const product = await Product.findById(prodId);
-    let alreadyRated = product.ratings.find(
+    let alreadyRated = product.ratings1.find(
       (userId) => userId.postedby.toString() === _id.toString()
     );
     if (alreadyRated) {
       const updateRating = await Product.updateOne(
         {
-          ratings: { $elemMatch: alreadyRated },
+          ratings1: { $elemMatch: alreadyRated },
         },
         {
-          $set: { "ratings.$.star": star, "ratings.$.comment": comment },
+          $set: { "ratings1.$.star": star, "ratings1.$.comment": comment },
         },
         {
           new: true,
@@ -163,10 +164,11 @@ const ratingProduct = asyncHandler(async (req, res) => {
         prodId,
         {
           $push: {
-            ratings: {
+            ratings1: {
               star: star,
               comment: comment,
               postedby: _id,
+              fullname:fullname
             },
           },
         },
@@ -177,8 +179,8 @@ const ratingProduct = asyncHandler(async (req, res) => {
       res.json(rateProduct);
     }
     const getallratings = await Product.findById(prodId);
-    let totalRating = getallratings.ratings.length;
-    let ratingsum = getallratings.ratings
+    let totalRating = getallratings.ratings1.length;
+    let ratingsum = getallratings.ratings1
       .map((item) => item.star)
       .reduce((prev, curr) => prev + curr, 0);
     let actualRating = Math.round(ratingsum / totalRating);
@@ -195,32 +197,6 @@ const ratingProduct = asyncHandler(async (req, res) => {
   }
 })
 
-const uploadImage = asyncHandler(async (req, res) => {
-  const { id } = req.params
-  validateMongoDbId(id);
-  try {
-    const uploader = (path) => cloudinaryUploadImg(path, "images");
-    const urls = [];
-    const files = req.files
-    for (const file of files) {
-      const { path } = file;
-      const newPath = await uploader(path);
-      urls.push(newPath);
-    }
-    const findProduct = await Product.findByIdAndUpdate(id, {
-      images: urls.map((file => {
-        return file
-      }),
-        {
-          new: true
-        })
-    })
-    res.json(findProduct);
 
-  } catch (err) {
-    throw new Error(err)
-  }
 
-})
-
-module.exports = { createProduct, getaProduct, getAllProduct, updateProduct, deleteProduct, addToWishList, ratingProduct, uploadImage }
+module.exports = { createProduct, getaProduct, getAllProduct, updateProduct, deleteProduct, addToWishList, ratingProduct }

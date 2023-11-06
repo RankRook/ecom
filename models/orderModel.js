@@ -7,12 +7,12 @@ var orderSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
-    shippigInfo: {
-      firstName: {
+    shippingInfo: {
+      firstname: {
         type: String,
         required: true,
       },
-      lastName: {
+      lastname: {
         type: String,
         required: true,
       },
@@ -24,7 +24,7 @@ var orderSchema = new mongoose.Schema(
         type: String,
         required: true,
       },
-      phone: {
+      mobile: {
         type: Number,
         required: true,
       },
@@ -50,22 +50,24 @@ var orderSchema = new mongoose.Schema(
       type: Date,
       default: Date.now(),
     },
-    totlePrice: {
+    totalPrice: {
       type: Number,
       required: true,
     },
-    totlePriceAfterDiscount: {
+    totalPriceAfterDiscount: {
       type: Number,
       required: true,
+    },
+    month: {
+      type: String,
+      default: new Date().getMonth(),
     },
     orderStatus: {
       type: String,
       default: "Ordered",
     },
     paymentMethod: { type: String, required: true },
-    itemsPrice: { type: Number, required: true },
     isPaid: { type: Boolean, default: false },
-    paidAt: { type: Date },
     isDelivered: { type: Boolean, default: false },
     deliveredAt: { type: Date },
   },

@@ -11,6 +11,7 @@ const blogCatRouter = require('./routes/blogCatRoute')
 const brandRouter = require('./routes/brandRoute')
 const couponRouter = require('./routes/couponRoute')
 const enqRouter = require('./routes/enqRoute')
+// const paymentRouter = require('./routes/paymentRoute')
 const uploadRouter = require('./routes/uploadRoute')
 const bodyParser = require('body-parser')
 const cookieParser = require("cookie-parser")
@@ -34,7 +35,9 @@ app.use("/api/enquiry", enqRouter);
 app.use('/api/brand', brandRouter)
 app.use('/api/coupon', couponRouter)
 app.use('/api/upload', uploadRouter)
+// app.use('/api/payment', paymentRouter)
 
+// console.log(process.env.CLIENT_ID)
 // app.use(notFound)
 // app.use(errorHandler)
 

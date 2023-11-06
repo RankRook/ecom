@@ -5,12 +5,15 @@ const {
   cloudinaryUploadImg,
   cloudinaryDeleteImg,
 } = require("../utils/cloudinary");
+
 const uploadImages = asyncHandler(async (req, res) => {
   try {
     const uploader = (path) => cloudinaryUploadImg(path, "images");
     const urls = [];
     const files = req.files;
-    for (const file of files) {
+    const fileKeys = Object.keys(files); // Get the keys of the files object
+    for (const key of fileKeys) {
+      const file = files[key];
       const { path } = file;
       const newpath = await uploader(path);
       console.log(newpath);
@@ -25,6 +28,7 @@ const uploadImages = asyncHandler(async (req, res) => {
     throw new Error(error);
   }
 });
+
 const deleteImages = asyncHandler(async (req, res) => {
   const { id } = req.params;
   try {

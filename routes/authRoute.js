@@ -19,17 +19,23 @@ const { createUser,
     getUserCart,
     createOrder,
     // emptyCart,
-    // applyCoupon,
+    applyCoupon,
     // getOrders,
-    // updateOrderStatus,
-    // getAllOrders,
+    updateOrders,
+    getSingleOrders,
+    getAllOrders,
     removeProdFromCart,
+    getMonthWiseOrderIncome,
+    getMyOrders,
+    getYearlyTotalOrders,
+    getMonthWiseOrderCount,
     updateProdQuantityFromCart
 } = require("../controller/userCtrl");
 const { authMiddleware, isAdmin } = require('../middlewares/authMiddleware');
 // const { checkout, paymentVerification } = require('../controller/paymentCtrl');
 const router = express.Router();
-
+const dotenv = require('dotenv');
+dotenv.config()
 
 router.post("/register", createUser);
 router.post("/forgot-password-token", forgotPasswordToken);
@@ -40,19 +46,29 @@ router.put("/password", authMiddleware, updatePassword);
 router.post("/login", loginUserCtrl);
 router.post("/admin-login", loginAdmin);
 router.post("/cart", authMiddleware, userCart);
-// router.post("/order/checkout", authMiddleware, checkout)
-// router.post("/order/paymentVerification", authMiddleware, paymentVerification)
 
-// router.post("/cart/apply-coupon", authMiddleware, applyCoupon);
+router.get('/checkout/config', (req, res) => {
+    return res.status(200).json({
+      status: 'OK',
+      data: process.env.CLIENT_ID
+    })
+  })
+  
+router.post("/cart/apply-coupon", authMiddleware, applyCoupon);
 router.post("/cart/create-order", authMiddleware, createOrder);
-router.get("/all-users", getAllUser);
-// router.get("/get-orders", authMiddleware, getOrders);   
-// router.get("/getallorders", authMiddleware, isAdmin, getAllOrders);
-// router.post("/getorderbyuser/:id", authMiddleware, isAdmin, getAllOrders);
+router.get("/all-users",  getAllUser);
+router.get("/getmyorders", authMiddleware, getMyOrders)
+router.get("/getallorders", authMiddleware, isAdmin, getAllOrders)
+router.get("/getaorder/:id", authMiddleware, getSingleOrders)
+router.put("/updateOrder/:id", authMiddleware, isAdmin, updateOrders)
+
 router.get("/refresh", handleRefreshToken);
 router.get("/logout", logout);
 router.get("/wishlist", authMiddleware, getWishlist);
 router.get("/cart", authMiddleware, getUserCart);
+router.get("/getMonthWiseOrderIncome", authMiddleware, getMonthWiseOrderIncome);
+router.get("/getMonthWiseOrderCount", authMiddleware, getMonthWiseOrderCount);
+router.get("/getYearlyTotalOrders", authMiddleware, getYearlyTotalOrders);
 
 router.get("/:id", authMiddleware, isAdmin, getUser);
 
