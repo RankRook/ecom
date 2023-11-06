@@ -412,14 +412,11 @@ const createOrder = asyncHandler(async (req, res) => {
         },
         { new: true }
       );
-
       if (!product) {
         throw new Error(`Sản phẩm với ID ${order.product} không còn đủ hàng.`);
       }
     });
-
     await Promise.all(promises);
-
     const order = await Order.create({
       shippingInfo,
       orderItems,
@@ -487,6 +484,38 @@ const getMyOrders = asyncHandler(async (req, res) => {
     throw new Error(err);
   }
 });
+
+const getAllOrders = asyncHandler(async (req, res) => {
+  try {
+    const orders = await Order.find().populate('user')
+    res.json(orders);
+  } catch (err) {
+    throw new Error(err);
+  }
+});
+
+const getSingleOrders = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  try {
+    const orders = await Order.findOne({_id:id}).populate("orderItems.product")
+    res.json(orders);
+  } catch (err) {
+    throw new Error(err);
+  }
+});
+
+const updateOrders = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  try {
+    const orders = await Order.findById(id)
+    orders.orderStatus = req.body.status
+    await orders.save()
+    res.json(orders);
+  } catch (err) {
+    throw new Error(err);
+  }
+});
+
 
 const getMonthWiseOrderIncome = asyncHandler(async (req, res) => {
   let monthNames = [
@@ -644,4 +673,7 @@ module.exports = {
   getMonthWiseOrderCount,
   getYearlyTotalOrders,
   removeProdFromCart,
+  getAllOrders,
+  getSingleOrders,
+  updateOrders
 };

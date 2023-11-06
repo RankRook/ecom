@@ -21,8 +21,9 @@ const { createUser,
     // emptyCart,
     applyCoupon,
     // getOrders,
-    // updateOrderStatus,
-    // getAllOrders,
+    updateOrders,
+    getSingleOrders,
+    getAllOrders,
     removeProdFromCart,
     getMonthWiseOrderIncome,
     getMyOrders,
@@ -57,6 +58,10 @@ router.post("/cart/apply-coupon", authMiddleware, applyCoupon);
 router.post("/cart/create-order", authMiddleware, createOrder);
 router.get("/all-users",  getAllUser);
 router.get("/getmyorders", authMiddleware, getMyOrders)
+router.get("/getallorders", authMiddleware, isAdmin, getAllOrders)
+router.get("/getaorder/:id", authMiddleware, getSingleOrders)
+router.put("/updateOrder/:id", authMiddleware, isAdmin, updateOrders)
+
 router.get("/refresh", handleRefreshToken);
 router.get("/logout", logout);
 router.get("/wishlist", authMiddleware, getWishlist);
