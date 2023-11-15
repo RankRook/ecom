@@ -70,7 +70,7 @@ router.get("/getMonthWiseOrderIncome", authMiddleware, getMonthWiseOrderIncome);
 router.get("/getMonthWiseOrderCount", authMiddleware, getMonthWiseOrderCount);
 router.get("/getYearlyTotalOrders", authMiddleware, getYearlyTotalOrders);
 
-router.get("/:id", authMiddleware, isAdmin, getUser);
+router.get("/use-info", authMiddleware,getUser);
 
 router.delete("/delete-product-cart/:cartItemId", authMiddleware, removeProdFromCart);
 router.delete("/update-product-cart/:cartItemId/:newQuantity", authMiddleware, updateProdQuantityFromCart);

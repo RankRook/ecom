@@ -26,6 +26,18 @@ var userSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    country: {
+      type: String,
+      default: ""
+    },
+    city: {
+      type: String,
+
+    },
+    address: {
+      type: String,
+
+    },
     role: {
       type: String,
       default: "user",
@@ -37,9 +49,6 @@ var userSchema = new mongoose.Schema(
     cart: {
       type: Array,
       default: [],
-    },
-    address: {
-      type: String,
     },
     wishlist: [{ type: mongoose.Schema.Types.ObjectId, ref: "Product" }],
     refreshToken: {
