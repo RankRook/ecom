@@ -18,12 +18,30 @@ const createUser = asyncHandler(async (req, res) => {
   const email = req.body.email;
   const findUser = await User.findOne({ email: email });
   if (!findUser) {
-    const newUser = await User.create(req.body);
+    // Create a new user document with only the desired fields
+    const newUser = new User({
+      address: req.body.address,
+      country: req.body.country,
+      city: req.body.city,
+      firstname : req.body.firstname,
+      lastname : req.body.lastname,
+      email : req.body.email,
+      mobile : req.body.mobile,
+      password : req.body.password,
+    });
+
+    // Optionally, you can also set other fields if needed
+
+
+    // Save the user document
+    await newUser.save();
+    console.log(newUser)
     res.json(newUser);
   } else {
     throw new Error("User Already Exists");
   }
 });
+
 
 //Login functionality
 
@@ -42,7 +60,7 @@ const loginUserCtrl = asyncHandler(async (req, res) => {
     );
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
-      maxAge: 72 * 60 * 60 * 1000,
+      maxAge: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000),
     });
     res.json({
       _id: findUser?._id,
@@ -76,7 +94,7 @@ const loginAdmin = asyncHandler(async (req, res) => {
     );
     res.cookie("refreshTtoken", refreshToken, {
       httpOnly: true,
-      maxAge: 72 * 60 * 60 * 1000,
+      maxAge: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000),
     });
     res.json({
       _id: findAdmin?._id,
@@ -135,7 +153,6 @@ const logout = asyncHandler(async (req, res) => {
 //Update a user
 
 const updatedUser = asyncHandler(async (req, res) => {
-  console.log(req.user);
   const { _id } = req.user;
   validateMongoDbId(_id);
   try {
@@ -146,6 +163,9 @@ const updatedUser = asyncHandler(async (req, res) => {
         lastname: req?.body?.lastname,
         email: req?.body?.email,
         mobile: req?.body?.mobile,
+        country: req?.body?.country,
+        city: req?.body?.city,
+        address: req?.body?.address,
       },
       {
         new: true,
@@ -171,10 +191,9 @@ const getAllUser = asyncHandler(async (req, res) => {
 // Get a single user
 
 const getUser = asyncHandler(async (req, res) => {
-  const { id } = req.params;
-  validateMongoDbId(id);
+
   try {
-    const getaUser = await User.findById(id);
+    const getaUser = await User.findById(req.user.id);
     res.json({
       getaUser,
     });
@@ -312,21 +331,32 @@ const getWishlist = asyncHandler(async (req, res) => {
 const saveAddress = asyncHandler(async (req, res) => {
   const { _id } = req.user;
   validateMongoDbId(_id);
+
   try {
-    const saveAddress = await User.findByIdAndUpdate(
-      _id,
-      {
-        address: req?.body?.address,
-      },
-      {
-        new: true,
-      }
-    );
-    res.json(saveAddress);
+    const user = await User.findById(_id);
+
+    if (!user) {
+      throw new Error("User not found");
+    }
+    // Extract the address details from the request body
+    const { country, city, address } = req.body;
+    // Create a new address object
+    const newAddress = {
+      country,
+      city,
+      address,
+    };
+    // Push the new address into the user's addresses array
+    user.addresses.push(newAddress);
+    // Save the user's updated data
+    const updatedUser = await user.save();
+    res.json(updatedUser);
   } catch (error) {
     throw new Error(error);
   }
 });
+
+
 
 const userCart = asyncHandler(async (req, res) => {
   const { productId, quantity, price } = req.body;

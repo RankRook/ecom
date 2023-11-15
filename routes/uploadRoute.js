@@ -4,7 +4,7 @@ const router = express.Router();
 const { isAdmin, authMiddleware } = require("../middlewares/authMiddleware");
 const {
   uploadPhoto,
-  productImgResize,
+  ImgResize,
 } = require("../middlewares/uploadImages");
 //router phải dùng dấu "" ngoặc kép, còn ngoặc đơn đéo được
 
@@ -12,7 +12,7 @@ router.post(
   "/",
   authMiddleware,
   isAdmin,
-  productImgResize,
+  ImgResize,
   uploadPhoto.array("images", 10),
   uploadImages
 );
