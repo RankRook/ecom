@@ -29,16 +29,11 @@ const createUser = asyncHandler(async (req, res) => {
       mobile : req.body.mobile,
       password : req.body.password,
     });
-
-    // Optionally, you can also set other fields if needed
-
-
     // Save the user document
     await newUser.save();
-    console.log(newUser)
     res.json(newUser);
   } else {
-    throw new Error("User Already Exists");
+    throw new Error("User Already Exists ");
   }
 });
 
@@ -80,6 +75,7 @@ const loginUserCtrl = asyncHandler(async (req, res) => {
 const loginAdmin = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
   const findAdmin = await User.findOne({ email });
+  const token = generateToken(findAdmin?._id);
   if (findAdmin.role !== "admin") throw new Error("Not Authorized");
   if (findAdmin && (await findAdmin.isPasswordMatched(password))) {
     const refreshToken = await generateRefreshToken(findAdmin?._id);
@@ -102,7 +98,8 @@ const loginAdmin = asyncHandler(async (req, res) => {
       lastname: findAdmin?.lastname,
       email: findAdmin?.email,
       mobile: findAdmin?.mobile,
-      token: generateToken(findAdmin?._id),
+      token:token,
+      expiresIn: jwt.decode(token).exp,
     });
   } else {
     throw new Error("Invalid Credentia");
@@ -191,7 +188,6 @@ const getAllUser = asyncHandler(async (req, res) => {
 // Get a single user
 
 const getUser = asyncHandler(async (req, res) => {
-
   try {
     const getaUser = await User.findById(req.user.id);
     res.json({
@@ -201,6 +197,21 @@ const getUser = asyncHandler(async (req, res) => {
     throw new Error(error);
   }
 });
+
+const getAUser = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  validateMongoDbId(id);
+
+  try {
+    const getaUser = await User.findById(id);
+    res.json({
+      getaUser,
+    });
+  } catch (error) {
+    throw new Error(error);
+  }
+});
+
 // Delete functionality
 
 const deleteUser = asyncHandler(async (req, res) => {
@@ -280,7 +291,7 @@ const forgotPasswordToken = asyncHandler(async (req, res) => {
   try {
     const token = await user.createPasswordResetToken();
     await user.save();
-    const resetURL = `Hi, Please follow this link to reset Your Password. This link is valid till 10 minutes from now. <a href='http://localhost:3000/reset-password/${token}'>Click Here</>`;
+    const resetURL = `Hi, Please follow this link to reset Your Password. This link is valid till 10 minutes from now. <a href='http://localhost:3000/reset-password/${token}'>Click Here</a>`;
     const data = {
       to: email,
       text: "Hey User",
@@ -288,6 +299,7 @@ const forgotPasswordToken = asyncHandler(async (req, res) => {
       html: resetURL,
     };
     sendEmail(data);
+    console.log
     res.json(token);
   } catch (error) {
     throw new Error(error);
@@ -308,6 +320,7 @@ const resetPassword = asyncHandler(async (req, res) => {
   user.passwordResetToken = undefined;
   user.passwordResetExpires = undefined;
   await user.save();
+  console.log(user)
   res.json(user);
 });
 
@@ -315,7 +328,6 @@ const resetPassword = asyncHandler(async (req, res) => {
 
 const getWishlist = asyncHandler(async (req, res) => {
   const { _id } = req.user;
-
   try {
     const findUser = await User.findById(_id).populate("wishlist");
     res.json({
@@ -326,40 +338,9 @@ const getWishlist = asyncHandler(async (req, res) => {
   }
 });
 
-// Save user andress
-
-const saveAddress = asyncHandler(async (req, res) => {
-  const { _id } = req.user;
-  validateMongoDbId(_id);
-
-  try {
-    const user = await User.findById(_id);
-
-    if (!user) {
-      throw new Error("User not found");
-    }
-    // Extract the address details from the request body
-    const { country, city, address } = req.body;
-    // Create a new address object
-    const newAddress = {
-      country,
-      city,
-      address,
-    };
-    // Push the new address into the user's addresses array
-    user.addresses.push(newAddress);
-    // Save the user's updated data
-    const updatedUser = await user.save();
-    res.json(updatedUser);
-  } catch (error) {
-    throw new Error(error);
-  }
-});
-
-
-
 const userCart = asyncHandler(async (req, res) => {
   const { productId, quantity, price } = req.body;
+  const { prodId } = req.body;
   const { _id } = req.user;
   validateMongoDbId(_id);
   try {
@@ -369,6 +350,16 @@ const userCart = asyncHandler(async (req, res) => {
       quantity,
       price,
     }).save();
+    await User.findByIdAndUpdate(
+      _id,
+      {
+        $push: { cart: prodId },
+      },
+      {
+        new: true,
+      }
+    );
+
     res.json(newCart);
   } catch (error) {
     throw new Error(error);
@@ -415,6 +406,19 @@ const updateProdQuantityFromCart = asyncHandler(async (req, res) => {
   }
 });
 
+const emptyCart = asyncHandler(async (req, res) => {
+  const { _id } = req.user;
+  validateMongoDbId(_id);
+  try {
+    const emptyCart = await Cart.deleteMany({
+      userId: _id,
+    });
+    res.json(emptyCart);
+  } catch (error) {
+    throw new Error(error);
+  }
+});
+
 const createOrder = asyncHandler(async (req, res) => {
   const {
     shippingInfo,
@@ -443,7 +447,7 @@ const createOrder = asyncHandler(async (req, res) => {
         { new: true }
       );
       if (!product) {
-        throw new Error(`Sản phẩm với ID ${order.product} không còn đủ hàng.`);
+        throw new Error(`Product with ID ${order.product} not have enought quantity.`);
       }
     });
     await Promise.all(promises);
@@ -468,40 +472,76 @@ const createOrder = asyncHandler(async (req, res) => {
     });
   }
 });
-
 const applyCoupon = asyncHandler(async (req, res) => {
   const { coupon } = req.body;
   const { _id } = req.user;
+  const { cartItemId } = req.params;
   validateMongoDbId(_id);
   const validCoupon = await Coupon.findOne({ name: coupon });
-
   if (validCoupon === null) {
     throw new Error("Invalid Coupon");
   }
-
   const user = await User.findOne({ _id });
-  const order = await Order.findOne({ user: user._id });
+  const cartTotal = await Cart.find({ userId: _id  });
 
-  if (!order) {
-    throw new Error("Order not found");
-  }
+  let data = await Cart.aggregate([
+    {
+      $match: {userId: _id}
+    },
+    {
+      $group: {
+        _id: {userId: _id},
+        amount: { $sum: "$price" },
+      },
+    },
+  ]);
+  const amount = data.length > 0 ? data[0].amount : 0;
 
-  // Tính toán giá trị mới sau khi áp dụng mã giảm giá
-  const { totalPrice } = order;
-  const totalAfterDiscount = (
-    totalPrice -
-    (totalPrice * validCoupon.discount) / 100
+  let totalAfterDiscount = (
+    amount -
+    (amount * validCoupon.discount) / 100
   ).toFixed(2);
-
-  // Cập nhật giá trị mới vào đơn hàng
-  const updatedOrder = await Order.findOneAndUpdate(
-    { user: user._id },
+  await Cart.findOneAndUpdate(
+    { orderby: user._id },
     { totalAfterDiscount },
     { new: true }
   );
-
-  res.json(updatedOrder);
+  res.json(totalAfterDiscount);
 });
+
+
+// const applyCoupon = asyncHandler(async (req, res) => {
+//   const { coupon } = req.body;
+//   const { _id } = req.user;
+//   validateMongoDbId(_id);
+//   const validCoupon = await Coupon.findOne({ name: coupon });
+
+//   if (validCoupon === null) {
+//     throw new Error("Invalid Coupon");
+//   }
+
+//   const user = await User.findOne({ _id });
+//   const order = await Order.findOne({ user: user._id });
+
+//   if (!order) {
+//     throw new Error("Order not found");
+//   }
+
+
+//   const { totalPrice } = order;
+//   const totalAfterDiscount = (
+//     totalPrice -
+//     (totalPrice * validCoupon.discount) / 100
+//   ).toFixed(2);
+
+//   const updatedOrder = await Order.findOneAndUpdate(
+//     { user: user._id },
+//     { totalAfterDiscount },
+//     { new: true }
+//   );
+
+//   res.json(updatedOrder);
+// });
 
 const getMyOrders = asyncHandler(async (req, res) => {
   const { _id } = req.user;
@@ -529,6 +569,18 @@ const getSingleOrders = asyncHandler(async (req, res) => {
   try {
     const orders = await Order.findOne({_id:id}).populate("orderItems.product")
     res.json(orders);
+  } catch (err) {
+    throw new Error(err);
+  }
+});
+
+const updateRoles = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  try {
+    const roles = await User.findById(id)
+    roles.role = req.body.status
+    await roles.save()
+    res.json(roles);
   } catch (err) {
     throw new Error(err);
   }
@@ -681,6 +733,7 @@ module.exports = {
   loginUserCtrl,
   getAllUser,
   getUser,
+  getAUser,
   deleteUser,
   updatedUser,
   blockUser,
@@ -692,7 +745,6 @@ module.exports = {
   forgotPasswordToken,
   loginAdmin,
   getWishlist,
-  saveAddress,
   userCart,
   getUserCart,
   applyCoupon,
@@ -705,5 +757,7 @@ module.exports = {
   removeProdFromCart,
   getAllOrders,
   getSingleOrders,
-  updateOrders
+  updateOrders,
+  emptyCart,
+  updateRoles
 };

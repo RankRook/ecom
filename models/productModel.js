@@ -22,11 +22,11 @@ var productSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
-    category: {
+    pcategories: {
       type: String,
       required: true,
     },
-    brand: {
+    brands: {
       type: String,
       required: true,
     },
@@ -45,7 +45,7 @@ var productSchema = new mongoose.Schema(
       }
     ],
     tags: String,
-    ratings1: [
+    ratings: [
       {
         star: Number,
         comment: String,

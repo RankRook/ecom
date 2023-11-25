@@ -70,25 +70,20 @@ const getAllProduct = asyncHandler(async (req, res) => {
     let query = Product.find(JSON.parse(queryStr));
 
     // Sorting
-
     if (req.query.sort) {
       const sortBy = req.query.sort.split(",").join(" ");
       query = query.sort(sortBy);
     } else {
       query = query.sort("-createdAt");
     }
-
     // limiting the fields
-
     if (req.query.fields) {
       const fields = req.query.fields.split(",").join(" ");
       query = query.select(fields);
     } else {
       query = query.select("-__v");
     }
-
     // pagination
-
     const page = req.query.page;
     const limit = req.query.limit;
     const skip = (page - 1) * limit;
@@ -143,16 +138,16 @@ const ratingProduct = asyncHandler(async (req, res) => {
   const { star, prodId, comment, fullname } = req.body;
   try {
     const product = await Product.findById(prodId);
-    let alreadyRated = product.ratings1.find(
+    let alreadyRated = product.ratings.find(
       (userId) => userId.postedby.toString() === _id.toString()
     );
     if (alreadyRated) {
       const updateRating = await Product.updateOne(
         {
-          ratings1: { $elemMatch: alreadyRated },
+          ratings: { $elemMatch: alreadyRated },
         },
         {
-          $set: { "ratings1.$.star": star, "ratings1.$.comment": comment },
+          $set: { "ratings.$.star": star, "ratings.$.comment": comment },
         },
         {
           new: true,
@@ -164,7 +159,7 @@ const ratingProduct = asyncHandler(async (req, res) => {
         prodId,
         {
           $push: {
-            ratings1: {
+            ratings: {
               star: star,
               comment: comment,
               postedby: _id,
@@ -179,8 +174,8 @@ const ratingProduct = asyncHandler(async (req, res) => {
       res.json(rateProduct);
     }
     const getallratings = await Product.findById(prodId);
-    let totalRating = getallratings.ratings1.length;
-    let ratingsum = getallratings.ratings1
+    let totalRating = getallratings.ratings.length;
+    let ratingsum = getallratings.ratings
       .map((item) => item.star)
       .reduce((prev, curr) => prev + curr, 0);
     let actualRating = Math.round(ratingsum / totalRating);
