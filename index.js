@@ -35,7 +35,6 @@ app.use("/api/enquiry", enqRouter);
 app.use('/api/brand', brandRouter)
 app.use('/api/coupon', couponRouter)
 app.use('/api/upload', uploadRouter)
-// app.use('/api/payment', paymentRouter)
 
 // console.log(process.env.CLIENT_ID)
 // app.use(notFound)

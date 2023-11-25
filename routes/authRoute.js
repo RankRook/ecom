@@ -3,6 +3,7 @@ const { createUser,
     loginUserCtrl,
     getAllUser,
     getUser,
+    getAUser,
     deleteUser,
     updatedUser,
     blockUser,
@@ -13,14 +14,14 @@ const { createUser,
     forgotPasswordToken,
     resetPassword,
     loginAdmin,
-    saveAddress,
     getWishlist,
     userCart,
     getUserCart,
     createOrder,
-    // emptyCart,
+    emptyCart,
     applyCoupon,
     // getOrders,
+    updateRoles,
     updateOrders,
     getSingleOrders,
     getAllOrders,
@@ -61,7 +62,7 @@ router.get("/getmyorders", authMiddleware, getMyOrders)
 router.get("/getallorders", authMiddleware, isAdmin, getAllOrders)
 router.get("/getaorder/:id", authMiddleware, getSingleOrders)
 router.put("/updateOrder/:id", authMiddleware, isAdmin, updateOrders)
-
+router.put("/updateRole/:id", authMiddleware, isAdmin, updateRoles)
 router.get("/refresh", handleRefreshToken);
 router.get("/logout", logout);
 router.get("/wishlist", authMiddleware, getWishlist);
@@ -71,16 +72,14 @@ router.get("/getMonthWiseOrderCount", authMiddleware, getMonthWiseOrderCount);
 router.get("/getYearlyTotalOrders", authMiddleware, getYearlyTotalOrders);
 
 router.get("/use-info", authMiddleware,getUser);
-
+router.get("/user-info/:id", authMiddleware, isAdmin, getAUser);
 router.delete("/delete-product-cart/:cartItemId", authMiddleware, removeProdFromCart);
 router.delete("/update-product-cart/:cartItemId/:newQuantity", authMiddleware, updateProdQuantityFromCart);
 
-// router.delete("/empty-cart", authMiddleware, emptyCart);
-router.delete("/:id", deleteUser);
+router.delete("/empty-cart", authMiddleware, emptyCart);
+router.delete("/delete-user/:id", deleteUser);
 
-// router.put("/order/update-order/:id", authMiddleware, isAdmin, updateOrderStatus);
 router.put("/edit-user", authMiddleware, updatedUser);
-router.put("/save-address", authMiddleware, saveAddress);
 router.put("/block-user/:id", authMiddleware, isAdmin, blockUser);
 router.put("/unblock-user/:id", authMiddleware, isAdmin, unBlockUser);
 

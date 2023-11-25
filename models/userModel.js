@@ -28,7 +28,6 @@ var userSchema = new mongoose.Schema(
     },
     country: {
       type: String,
-      default: ""
     },
     city: {
       type: String,
@@ -46,10 +45,10 @@ var userSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
-    cart: {
-      type: Array,
-      default: [],
-    },
+    // cart: {
+    //   type: Array,
+    //   default: [],
+    // },
     wishlist: [{ type: mongoose.Schema.Types.ObjectId, ref: "Product" }],
     refreshToken: {
       type: String,

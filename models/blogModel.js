@@ -11,7 +11,7 @@ var blogSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    category: {
+    bcategories: {
       type: String,
       required: true,
     },
