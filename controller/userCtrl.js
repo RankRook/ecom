@@ -482,9 +482,7 @@ const applyCoupon = asyncHandler(async (req, res) => {
     throw new Error("Invalid Coupon");
   }
   const user = await User.findOne({ _id });
-  const cartTotal = await Cart.find({ userId: _id  });
-
-  let data = await Cart.aggregate([
+  let cartTotal = await Cart.aggregate([
     {
       $match: {userId: _id}
     },
@@ -495,8 +493,7 @@ const applyCoupon = asyncHandler(async (req, res) => {
       },
     },
   ]);
-  const amount = data.length > 0 ? data[0].amount : 0;
-
+  const amount = cartTotal.length > 0 ? cartTotal[0].amount : 0;
   let totalAfterDiscount = (
     amount -
     (amount * validCoupon.discount) / 100
