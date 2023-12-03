@@ -35,7 +35,7 @@ app.use('/api/brand', brandRouter)
 app.use('/api/coupon', couponRouter)
 app.use('/api/upload', uploadRouter)
 
-// console.log(process.env.CLIENT_ID)
+console.log(process.env.CLIENT_ID)
 // app.use(notFound)
 // app.use(errorHandler)
 
