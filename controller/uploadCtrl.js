@@ -17,7 +17,7 @@ const uploadImages = asyncHandler(async (req, res) => {
       const { path } = file;
       const newpath = await uploader(path);
       urls.push(newpath);
-      fs.unlinkSync(path);
+     
     }
     const images = urls.map((file) => {
       return file;
@@ -31,12 +31,26 @@ const uploadImages = asyncHandler(async (req, res) => {
 const deleteImages = asyncHandler(async (req, res) => {
   const { id } = req.params;
   try {
-    const deleted = cloudinaryDeleteImg(id, "images");
+    const deletedFromCloudinary = await cloudinaryDeleteImg(id, "images");
+    const localFilePath = `public/images/${id}`; // Adjust the file extension as needed
+    fs.unlink(localFilePath, (err) => {
+      if (err) {
+        console.error(`Error deleting local file: ${err}`);
+      } else {
+        console.log("Local file deleted successfully");
+      }
+    });
     res.json({ message: "Deleted" });
   } catch (error) {
     throw new Error(error);
   }
 });
+
+module.exports = {
+  uploadImages,
+  deleteImages,
+};
+
 
 module.exports = {
   uploadImages,
