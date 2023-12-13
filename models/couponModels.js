@@ -1,4 +1,4 @@
-const mongoose = require("mongoose"); // Erase if already required
+const mongoose = require("mongoose");
 
 // Declare the Schema of the Mongo model
 var couponSchema = new mongoose.Schema({
@@ -16,6 +16,10 @@ var couponSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
+  appliedBy: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+  }],
 });
 
 //Export the model

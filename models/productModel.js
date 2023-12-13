@@ -23,11 +23,13 @@ var productSchema = new mongoose.Schema(
       required: true,
     },
     pcategories: {
-      type: String,
+      type: mongoose.ObjectId,
+      ref: "PCategory",
       required: true,
     },
     brands: {
-      type: String,
+      type: mongoose.ObjectId,
+      ref: "Brand",
       required: true,
     },
     quantity: {

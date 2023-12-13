@@ -2,6 +2,7 @@ const Product = require("../models/productModel")
 const User = require("../models/userModel")
 const asyncHandler = require("express-async-handler")
 const slugify = require("slugify")
+const Order = require("../models/orderModel");
 const {cloudinaryUploadImg, cloudinaryDeleteImg} = require("../utils/cloudinary");
 const validateMongoDbId = require("../utils/validateMongodbId");
 
@@ -58,6 +59,7 @@ const getaProduct = asyncHandler(async (req, res) => {
   }
 });
 
+
 const getAllProduct = asyncHandler(async (req, res) => {
   try {
     // Filtering
@@ -84,8 +86,8 @@ const getAllProduct = asyncHandler(async (req, res) => {
       query = query.select("-__v");
     }
     // pagination
-    const page = req.query.page;
-    const limit = req.query.limit;
+    const page = req.query.page || 1 ;
+    const limit = req.query.limit ;
     const skip = (page - 1) * limit;
     query = query.skip(skip).limit(limit);
     if (req.query.page) {
@@ -137,6 +139,18 @@ const ratingProduct = asyncHandler(async (req, res) => {
   const { _id } = req.user;
   const { star, prodId, comment, fullname } = req.body;
   try {
+
+    const hasPlacedOrder = await Order.exists({
+      user: _id,
+      "orderItems.product": prodId,
+    });
+
+    if (!hasPlacedOrder) {
+      return res.status(403).json({
+        error: "You can only rate products you have ordered.",
+      });
+    }
+
     const product = await Product.findById(prodId);
     let alreadyRated = product.ratings.find(
       (userId) => userId.postedby.toString() === _id.toString()

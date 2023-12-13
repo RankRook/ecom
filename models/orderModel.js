@@ -74,6 +74,7 @@ var orderSchema = new mongoose.Schema(
     isPaid: { type: Boolean, default: false },
     isDelivered: { type: Boolean, default: false },
     deliveredAt: { type: Date },
+    isCancelled: { type: Boolean, default: false },
   },
   {
     timestamps: true,
