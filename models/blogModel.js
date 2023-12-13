@@ -12,7 +12,8 @@ var blogSchema = new mongoose.Schema(
       required: true,
     },
     bcategories: {
-      type: String,
+      type: mongoose.ObjectId,
+      ref: "BCategory",
       required: true,
     },
     numViews: {

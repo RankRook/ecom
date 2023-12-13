@@ -29,7 +29,7 @@ const { createUser,
     getMonthWiseOrderIncome,
     getMyOrders,
     getYearlyTotalOrders,
-    getMonthWiseOrderCount,
+    // getMonthWiseOrderCount,
     updateProdQuantityFromCart
 } = require("../controller/userCtrl");
 const { authMiddleware, isAdmin } = require('../middlewares/authMiddleware');
@@ -61,14 +61,14 @@ router.get("/all-users",  getAllUser);
 router.get("/getmyorders", authMiddleware, getMyOrders)
 router.get("/getallorders", authMiddleware, isAdmin, getAllOrders)
 router.get("/getaorder/:id", authMiddleware, getSingleOrders)
-router.put("/updateOrder/:id", authMiddleware, isAdmin, updateOrders)
+router.put("/updateOrder/:id", authMiddleware, updateOrders)
 router.put("/updateRole/:id", authMiddleware, isAdmin, updateRoles)
 router.get("/refresh", handleRefreshToken);
 router.get("/logout", logout);
 router.get("/wishlist", authMiddleware, getWishlist);
 router.get("/cart", authMiddleware, getUserCart);
 router.get("/getMonthWiseOrderIncome", authMiddleware, getMonthWiseOrderIncome);
-router.get("/getMonthWiseOrderCount", authMiddleware, getMonthWiseOrderCount);
+// router.get("/getMonthWiseOrderCount", authMiddleware, getMonthWiseOrderCount);
 router.get("/getYearlyTotalOrders", authMiddleware, getYearlyTotalOrders);
 
 router.get("/use-info", authMiddleware,getUser);

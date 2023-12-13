@@ -40,7 +40,7 @@ const getBrand = asyncHandler(async (req, res) => {
     const getBrand = await Brand.findById(id);
     res.json(getBrand);
   } catch (err) {
-    throw new Error(err);
+    throw new Error(err); 
   }
 });
 

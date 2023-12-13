@@ -45,6 +45,10 @@ var userSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    usedCoupons: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Coupon',
+    }],
     // cart: {
     //   type: Array,
     //   default: [],
